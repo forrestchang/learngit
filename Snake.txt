@@ -69,8 +69,6 @@ int Hand;
 int Round = 1;
 int FoundFood = 0;
 struct Food food;
-int MainX;
-int MainY;
 
 int main()
 {
@@ -78,9 +76,9 @@ int main()
 	char a;
 	system("cls");
 	gotoxy(DX/2*2-4,DY/2-1);
-	printf("1.ÊÖ¶¯ÔËĞĞ");
+	printf("1.æ‰‹åŠ¨è¿è¡Œ");
 	gotoxy(DX/2*2-4,DY/2);
-	printf("2.×Ô¶¯ÔËĞĞ");
+	printf("2.è‡ªåŠ¨è¿è¡Œ");
 	a = getch();
 	if(a == '1')
 		Hand = 1;
@@ -93,9 +91,9 @@ int main()
 		{
 			system("cls");
 			gotoxy(DX/2*2-4,DY/2-1);
-			printf("1.ÊÖ¶¯ÔËĞĞ");
+			printf("1.æ‰‹åŠ¨è¿è¡Œ");
 			gotoxy(DX/2*2-4,DY/2);
-			printf("2.×Ô¶¯ÔËĞĞ");
+			printf("2.è‡ªåŠ¨è¿è¡Œ");
 			a = getch();
 			if(a == '1')
 				Hand = 1;
@@ -110,11 +108,11 @@ int main()
 			Round++;
 			system("cls");
 			gotoxy(DX/2*2-4,DY/2-1);
-			printf("¹§Ï²¹ı¹Ø\n");
+			printf("æ­å–œè¿‡å…³\n");
 			Sleep(500);
 			system("cls");
 			gotoxy(DX/2*2-4,DY/2-1);
-			printf("µÚ%d¹Ø\n",Round);
+			printf("ç¬¬%då…³\n",Round);
 			Sleep(500);
 			system("cls");
 			n = Game();
@@ -144,7 +142,7 @@ int Game()
 		system("cls");
 		PrintMap(Map,snake);
 		gotoxy(0,DY);
-		printf("ÈÎÒâ¼ü¿ªÊ¼ÓÎÏ·");
+		printf("ä»»æ„é”®å¼€å§‹æ¸¸æˆ");
 		getch();}
 	system("cls");
 	PrintMap(Map,snake);
@@ -161,11 +159,11 @@ int Game()
 			Sleep(500);
 			system("cls");
 			gotoxy(DX/2*2-4,DY/2-1);
-			printf("ÄãËÀÁË");
+			printf("ä½ æ­»äº†");
 			gotoxy(DX/2*2-4,DY/2+4);
-			printf("1.ÖØĞÂ¿ªÊ¼");
+			printf("1.é‡æ–°å¼€å§‹");
 			gotoxy(DX/2*2-4,DY/2+5);
-			printf("2.ÍË³öÓÎÏ·");
+			printf("2.é€€å‡ºæ¸¸æˆ");
 			fflush(stdin);
 			a = getch();
 			if(a == '2')
@@ -194,7 +192,7 @@ void setFood(int Map[DY][DX],struct Snake &snake)
 	food.Value = 1;
 	Map[food.Y][food.X] = food.Mode;
 	gotoxy(food.X*2,food.Y);
-	printf("¡î");
+	printf("â˜†");
 	return;
 }
 void Frist(int Map[DY][DX],struct Snake &snake)
@@ -232,12 +230,12 @@ void PrintMap(int Map[DY][DX],struct Snake &snake)
 		for(j=0;j<DX ;j++)
 			switch(Map[i][j])
 		{
-			case 99:printf("¨€");break;
-			case 2:printf("¡ñ");break;
-			case 3:printf("¡î");break;
+			case 99:printf("â–ˆ");break;
+			case 2:printf("â—");break;
+			case 3:printf("â˜†");break;
 			case 0:printf("  ");break;
-			case 4:printf("¨w");break;
-			default:printf("¨w");break;
+			case 4:printf("â•³");break;
+			default:printf("â•³");break;
 		}
 		printf("\n");
 	}
@@ -315,7 +313,7 @@ int move(int Map[DY][DX],struct Snake &snake)
 		}
 	}
 	gotoxy(1,DY+1);
-	printf("·½Ïò:%s",snake.face ==UP_?"ÉÏ":snake.face ==DOWN_?"ÏÂ":snake.face ==LEFT_?"×ó":snake.face ==RIGHT_?"ÓÒ":"¿Õ");
+	printf("æ–¹å‘:%s",snake.face ==UP_?"ä¸Š":snake.face ==DOWN_?"ä¸‹":snake.face ==LEFT_?"å·¦":snake.face ==RIGHT_?"å³":"ç©º");
 	Map[snake.Y][snake.X] = snake.Foot;
 	snake.Foot++;
 	if(snake.Life <= snake.Long)
@@ -353,12 +351,12 @@ int move(int Map[DY][DX],struct Snake &snake)
 	default: return -1;break;
 	}
 	gotoxy(snake.X*2,snake.Y);
-	printf("¨w");
+	printf("â•³");
 	snake.Y = y;
 	snake.X = x;
 	Map[y][x] = 2;
 	gotoxy(x*2,y);
-	printf("¡ñ");
+	printf("â—");
 	return 1;
 }
 void EatFoot(int Map[DY][DX],struct Snake &snake)
@@ -401,7 +399,7 @@ void Control(int Map[DY][DX],struct Snake &snake)
 void PrintText(struct Snake &snake)
 {
 	//gotoxy(30,20);
-	//printf("³¤¶È:%d,»ı·Ö:%d/%d",snake.Long,snake.Score,Round*Round*10);
+	//printf("é•¿åº¦:%d,ç§¯åˆ†:%d/%d",snake.Long,snake.Score,Round*Round*10);
 }
 
 int Event(int Map[DY][DX],int n,struct Snake &snake)
@@ -452,15 +450,15 @@ history* SnakeAI(int Map[DY][DX],struct Snake &snake)
 
 	while(1)
 	{
-		if(Found ==1)//ÊÇ·ñÕÒµ½Æ»¹û
+		if(Found ==1)//æ˜¯å¦æ‰¾åˆ°è‹¹æœ
 		{
 			return head;
 		}
-		if(head->isFinish ==4&&pold ==head)//ÊÇ·ñ±éÀúÍê
+		if(head->isFinish ==4&&pold ==head)//æ˜¯å¦éå†å®Œ
 		{
 			return NULL;
 		}
-		if(pold->isFinish>=4)//ÊÇ·ñ±éÀúÍê
+		if(pold->isFinish>=4)//æ˜¯å¦éå†å®Œ
 		{
 			pold=pold->LastPoint;
 			switch(pold->isFinish)
@@ -480,7 +478,7 @@ history* SnakeAI(int Map[DY][DX],struct Snake &snake)
 		case 3:if(isfoot[pold->y+1][pold->x]==1) {pold->isFinish++;continue;}break;
 		}
 		n++;
-		pnew= (history*)malloc(sizeof(history));//³õÊ¼»¯
+		pnew= (history*)malloc(sizeof(history));//åˆå§‹åŒ–
 		pnew->Foot = 0;
 		pnew->isFinish = 0;
 		pnew->DownPoint = NULL;
@@ -491,14 +489,14 @@ history* SnakeAI(int Map[DY][DX],struct Snake &snake)
 		pnew->GoodFace =UP_;
 		pnew->x = pold->x;
 		pnew->y = pold->y;
-		switch(pold->isFinish)//×ß·½Ïò
+		switch(pold->isFinish)//èµ°æ–¹å‘
 		{
 		case 0:pnew->y--;pold->GoodFace =UP_;break;
 		case 1:pnew->x++;pold->GoodFace =RIGHT_;break;
 		case 2:pnew->x--;pold->GoodFace =LEFT_;break;
 		case 3:pnew->y++;pold->GoodFace =DOWN_;break;
 		}
-		switch(pold->isFinish)//¶¨ÒåÉÏÒ»¸öµãÓëĞÂµÄÁ¬½Ó
+		switch(pold->isFinish)//å®šä¹‰ä¸Šä¸€ä¸ªç‚¹ä¸æ–°çš„è¿æ¥
 		{
 		case 0:pold->UpPoint = pnew;break;
 		case 1: pold->RightPoint = pnew;break;
@@ -544,15 +542,15 @@ history* SnakeAITail(int Map[DY][DX],struct Snake &snake)
 
 	while(1)
 	{
-		if(Found ==1)//ÊÇ·ñÕÒµ½Æ»¹û
+		if(Found ==1)//æ˜¯å¦æ‰¾åˆ°è‹¹æœ
 		{
 			return head;
 		}
-		if(head->isFinish ==4&&pold ==head)//ÊÇ·ñ±éÀúÍê
+		if(head->isFinish ==4&&pold ==head)//æ˜¯å¦éå†å®Œ
 		{
 			return NULL;
 		}
-		if(pold->isFinish>=4)//ÊÇ·ñ±éÀúÍê
+		if(pold->isFinish>=4)//æ˜¯å¦éå†å®Œ
 		{
 			pold=pold->LastPoint;
 			switch(pold->isFinish)
@@ -572,7 +570,7 @@ history* SnakeAITail(int Map[DY][DX],struct Snake &snake)
 		case 3:if(isfoot[pold->y][pold->x+1]==1) {pold->isFinish++;continue;}break;
 		}
 		n++;
-		pnew= (history*)malloc(sizeof(history));//³õÊ¼»¯
+		pnew= (history*)malloc(sizeof(history));//åˆå§‹åŒ–
 		pnew->Foot = 0;
 		pnew->isFinish = 0;
 		pnew->DownPoint = NULL;
@@ -583,14 +581,14 @@ history* SnakeAITail(int Map[DY][DX],struct Snake &snake)
 		pnew->GoodFace =UP_;
 		pnew->x = pold->x;
 		pnew->y = pold->y;
-		switch(pold->isFinish)//×ß·½Ïò
+		switch(pold->isFinish)//èµ°æ–¹å‘
 		{
 		case 0:pnew->y--;pold->GoodFace =UP_;break;
 		case 1:pnew->y++;pold->GoodFace =DOWN_;break;
 		case 2:pnew->x--;pold->GoodFace =LEFT_;break;
 		case 3:pnew->x++;pold->GoodFace =RIGHT_;break;
 		}
-		switch(pold->isFinish)//¶¨ÒåÉÏÒ»¸öµãÓëĞÂµÄÁ¬½Ó
+		switch(pold->isFinish)//å®šä¹‰ä¸Šä¸€ä¸ªç‚¹ä¸æ–°çš„è¿æ¥
 		{
 		case 0:pold->UpPoint = pnew;break;
 		case 1: pold->DownPoint = pnew;break;
