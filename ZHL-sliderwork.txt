@@ -1,0 +1,186 @@
+<!DOCTYPE html PUBLIC "-//W3C//DTD XHTML 1.0 Transitional//EN" "http://www.w3.org/TR/xhtml1/DTD/xhtml1-transitional.dtd">
+<html xmlns="http://www.w3.org/1999/xhtml">
+<head>
+<meta http-equiv="Content-Type" content="text/html; charset=gb2312" />
+<title>slider</title>
+<link rel="stylesheet" type="text/css" href="slider_3.css">
+</head>
+
+<body onload="setInterval('play()',1000)">
+<h1>Pet ! ! !</h1>
+
+<div>
+<img src="../image/1.jpg" height="600" width="900" class="align-center"/>
+<script src="slider_2.js" type="text/javascript">
+</script>
+</div>
+<h2>Detailed Imformation</h2>
+<p>
+	<ul>
+		<li><a href="about-dog.html">More About Dog Niuniu</a></li>
+		<li><a href="about-cat.html">More About Cat Duanwu</a></li>
+	</ul>
+</p>
+</body>
+</html>
+
+
+
+// JavaScript Document
+var timeID;
+var image;
+var current = 0;
+var images = new Array(5);
+
+function setSrc(i){
+current = i;
+image.src = images[i].src;
+}
+function play(){
+for (var i=1;i<=5;i++){
+images[i] = new Image(960,540);
+images[i].src = "../image/"+ i +".jpg";
+}
+image = document.images[0];
+if(current >=5 ){
+current = 0;
+}
+setSrc(++current);
+}
+
+
+/* CSS Document */
+h1{
+	font-family:cursive;
+	font-size: 400%;
+	background-color: #dddddd;
+	color: #666666;
+	text-shadow:2px 2px 0px #000000;
+} 
+div{
+	background-color: #cccccc;
+	color: #ffffff;
+	text-shadow:2px 2px 7px #111111;
+}
+img.align-center{
+	display: block;
+	margin: 100px,auto;
+}
+h2{
+	text-align: center;
+	vertical-align: text-top;
+	font-family: cursive;
+	font-size: 20px;
+}
+a:visited{
+	color: black;
+}
+li{
+	font-size: 150%;
+	text-align: center;
+	font-family: cursive;
+	margin:10px 0px 0px 0px;
+}
+
+
+
+/* about-dog */	
+<!DOCTYPE html PUBLIC "-//W3C//DTD XHTML 1.0 Transitional//EN" "http://www.w3.org/TR/xhtml1/DTD/xhtml1-transitional.dtd">
+<html xmlns="http://www.w3.org/1999/xhtml">
+<head>
+<meta http-equiv="Content-Type" content="text/html; charset=gb2312" />
+<title>dog</title>
+<link href="dog.css" type="text/css" rel="stylesheet"/>
+</head>
+
+<body>
+	<h1>Dog Niuniu!</h1>
+	<div class="ooo">
+	<img src="../image/6.jpg" width="600" height="900" ></div>
+	<div class="ttt">
+	<img src="../image/7.jpg" width="600" height="900" ></div>
+	</div>
+	<p>Ò»Ö»ÃÈÃÈµÄÈøÄ¦Ò®£¬ËÄËê£¬Ãû½Ðæ¤æ¤£¬Ö÷ÈËÊÇÎ¢²©ÈËÆø²©Ö÷¡ª¡ª»ØÒä×¨ÓÃÐ¡Âí¼×£¨Î¢²©µÚÒ»²ùÊº¹Ù£©¡£ ¾Ý²©Ö÷¡¢æ¤æ¤Ö÷ÈËÎ¢²©ÖÐµÄÄÚÈÝÏÔÊ¾£¬æ¤æ¤°®³Ô»¨Éú °®³ÔÈâ¸É °®³ÔËáÄÌ °®³ÔÂøÍ· ¸÷ÖÖË®¹û¡£æ¤æ¤Ö÷ÈËÉÏ´«µÄæ¤æ¤ÕÕÆ¬£¬ÍøÓÑ³Ææ¤æ¤ÊÇµ±Ö®ÎÞÀ¢µÄ¹·ÖÐÅ®Éñ¡£
+	</p>
+</body>
+</html>
+
+
+
+/* CSS Document */
+h1{
+	font-family:cursive;
+	font-size: 400%;
+	background-color: #dddddd;
+	color: #666666;
+	text-shadow:2px 2px 0px #000000;
+} 
+p{
+    font-family:"ÐÂËÎÌå";
+	font-size:200%;
+	line-height:1.4em;
+	background-color: #99CCFF;
+	color: #336666;
+}
+
+.ooo{
+float:left;
+width:600px;
+margin:25px;
+}
+.ttt{
+float:left;
+width:620px;
+margin:25px;
+}
+
+
+
+/* about-cat */
+<!DOCTYPE html PUBLIC "-//W3C//DTD XHTML 1.0 Transitional//EN" "http://www.w3.org/TR/xhtml1/DTD/xhtml1-transitional.dtd">
+<html xmlns="http://www.w3.org/1999/xhtml">
+<head>
+<meta http-equiv="Content-Type" content="text/html; charset=gb2312" />
+<title>Cat</title>
+<link href="cat.css" type="text/css" rel="stylesheet"/>
+</head>
+
+<body>
+	<h1>Cat Duanwu!</h1>
+	<div class="oone">
+	<img src="../image/9.jpg" width="500" height="700" ><br />
+	<img src="../image/10.jpg" width="500" height="700" >
+	</div>
+	<div class="ttwo">
+	<p>ÍøÂçÉÏºÜ»ðµÄÒ»Ö»ß÷ÐÇÈË£¬ÒòÎªÊÇÆäÖ÷ÈËÔÚ2014Äê¶ËÎç½ÚµÄÊ±°ÑËü±§»Ø¼ÒµÄ£¬Òò´Ë½Ð¶ËÎç¡£ÊÇÒ»Ö»ËÕ¸ñÀ¼ÕÛ¶úÃ¨¡£ÒòÎªÆäÖ÷ÈË¡°»ØÒä×¨ÓÃÐ¡Âí¼×¡±£¨Î¢²©£©µÄÒ»Ìõ¹ØÓÚ¶ËÎçÉíÊÀµÄ³¤Î¢²©¶ø×ßºì¡£¶ËÎçÒÔÆä¸ßÀäµÄ×ËÌ¬ºÍÃÈÃÈµÄ³¤Ïà£¬Ó®µÃÁË¹ã´óÍøÓÑµÄÈÈÅõ£¬ÈË³Æ¡°¶Ëåú¡±ºÍ¡°¶ËÅÖ¡±¡£ÏÖÒÑÓÐ¶à¸öÍâºÅ£ºßäßä¡¢â¨ºïÌÒ¡¢¶ËÅ£µÈ.</p>
+	<img src="../image/8.JPG" width="500" height="799" />
+	</div>
+</body>
+</html>
+
+
+/* CSS Document */
+h1{
+	font-family:cursive;
+	font-size: 400%;
+	background-color: #dddddd;
+	color: #666666;
+	text-shadow:2px 2px 0px #000000;
+} 
+p{
+    font-family:"ÐÂËÎÌå";
+	font-size:200%;
+	line-height:1.4em;
+	background-color: #99CCFF;
+	color: #336666;
+}
+.oone{
+float:left;
+width:520 px;
+margin:50px;
+}
+.ttwo{
+float:left;
+width:520px;
+margin:100px;
+}
