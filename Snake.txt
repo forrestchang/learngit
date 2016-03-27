@@ -5,8 +5,8 @@
 #include<time.h>
 #include<math.h>
 
-#define DX 30
-#define DY 20
+#define DX 6
+#define DY 6
 enum FACE {UP_ = 1,DOWN_= 2,LEFT_= 3,RIGHT_= 4};
 struct Snake
 {
@@ -64,11 +64,15 @@ int SnakeAIMove(int Map[DY][DX],Snake &snake,int _x,int _y);
 void SnakeAIMove2(int Map[DY][DX],Snake &snake,int _x,int _y);
 int GetMoveFoot(int Map[DY][DX],int x1,int y1,int x2,int y2);
 history *GetMoveHistory(int Map[DY][DX],int x1,int y1,int x2,int y2);
+int GetMoveFoot2(int Map[DY][DX],int x1,int y1,int x2,int y2,int Foots,int Min);
 
 int Hand;
 int Round = 1;
 int FoundFood = 0;
 struct Food food;
+int MainX;
+int MainY;
+int isFoot10[DY][DX] = {0};
 
 int main()
 {
@@ -770,9 +774,22 @@ int SnakeAIMove(int Map[DY][DX],Snake &snake,int _x,int _y)
 			else if(Map[i][j]>=99&&!(i==Fy&&j==Fx))
 				Foot[i][j] = DX*DY*2;
 			else 
-				Foot[i][j] = GetMoveFoot(Map,Fx,Fy,j,i);		
+				Foot[i][j] = GetMoveFoot(Map,j,i,Fx,Fy);		
 		}
 	}
+	system("cls");
+	for(i=0;i<DY;i++)
+	{
+	for(j=0;j<DX;j++)
+	{
+	printf("%-4d ",Foot[i][j]);
+	}
+	printf("\n");
+	}
+	PrintMap(Map,snake);
+	getch();
+	system("cls");
+	PrintMap(Map,snake);
 	Value = Foot[y][x];
 	while(1)
 	{
@@ -812,64 +829,45 @@ int GetMoveFoot(int Map[DY][DX],int x1,int y1,int x2,int y2)
 	int Fy = y1;
 	int x = x2;
 	int y = y2;
-	int Foot[DY][DX] = {0};
-	int isFoot[DY][DX] = {0};
 	int i,j;
-	int Value;
-
+	int Min =99999;
 	for(i=0;i<DY;i++)
-	{
 		for(j=0;j<DX;j++)
-		{
-			if(i==0||i==DY-1||j==0||j==DX-1)
-				Foot[i][j] = DX*DY*2;
-			else if(Map[i][j]>=99&&!(i==Fy&&j==Fx))
-				Foot[i][j] = DX*DY*2;
-			else 
-				Foot[i][j] = abs(j-Fx)+abs(i-Fy);		
-		}
-	}
-	while(1)
-	{
-		if(Fx == x&&Fy == y)
-			break;
-		Value = Foot[y][x];
-		while(1)
-		{
-			if((Value==Foot[y-1][x]+1&&Map[y-1][x]<99&&isFoot[y-1][x] ==0&&Map[y-1][x]!=2)||(Fx == x&&Fy == y-1))
-			{
-				foots++;
-				isFoot[y-1][x] =1;
-				y--;
-				break;
-			}
-			if((Value==Foot[y][x-1]+1&&Map[y][x-1]<99&&isFoot[y][x-1] ==0)||(Fx == x-1&&Fy == y))
-			{
-				foots++;
-				isFoot[y][x-1] =1;
-				x--;
-				break;
-			}
-			if((Value==Foot[y+1][x]+1&&Map[y+1][x]<99&&isFoot[y+1][x] ==0)||(Fx == x&&Fy == y+1))
-			{
-				foots++;
-				isFoot[y+1][x] =1;
-				y++;
-				break;
-			}
-			if((Value==Foot[y][x+1]+1&&Map[y][x+1]<99&&isFoot[y][x+1] ==0)||(Fx == x+1&&Fy == y))
-			{
-				foots++;
-				isFoot[y][x+1] =1;
-				x++;
-				break;
-			}
-			Value++;
-			if(Value>DY*DX)
-				return DY*DX*2;
-		}
-	}
+			isFoot10[i][j] = 0;
+	isFoot10[y1][x1] = 1;
+	foots = GetMoveFoot2(Map,x1,y1,x2,y2,0,Min);
 	return foots;
+}
+int GetMoveFoot2(int Map[DY][DX],int x1,int y1,int x2,int y2,int Foots,int Min)
+{
+	int tx,ty;
+	int i,j;
+	int next[4][2] = {
+		{-1,0},//上
+		{0,1},//右
+		{1,0},//下
+		{0,-1}//左
+	};
+	if(x1 == x2&&y1 == y2)
+	{
+		if(Foots<Min)
+			Min = Foots;
+		return Min;
+	}
+	for(i=0;i<4;i++)
+	{
+		tx = x1+ next[i][0];
+		ty = y1 +next[i][1];
+		if(ty<1||tx<1||ty>DY-1||tx>DX-1)
+			continue;
+		if(Map[ty][tx]<99&&isFoot10[ty][tx]==0)
+		{
+			isFoot10[ty][tx] = 1;
+			Min = GetMoveFoot2(Map,tx,ty,x2,y2,Foots+1,Min);
+			isFoot10[ty][tx] = 0;
+		}
+	}
+	return Min;
 }
 
 history *GetMoveHistory(int Map[DY][DX],int x1,int y1,int x2,int y2)
@@ -900,7 +898,7 @@ history *GetMoveHistory(int Map[DY][DX],int x1,int y1,int x2,int y2)
 			else if(Map[i][j]>=99&&!(i==Fy&&j==Fx))
 				Foot[i][j] = DX*DY*2;
 			else 
-				Foot[i][j] = GetMoveFoot(Map,Fx,Fy,j,i);		
+				Foot[i][j] = GetMoveFoot(Map,j,i,Fx,Fy);		
 		}
 	}
 	while(1)
@@ -920,7 +918,7 @@ history *GetMoveHistory(int Map[DY][DX],int x1,int y1,int x2,int y2)
 				pnew->LastPoint = pold;
 				pold->GoodFace = UP_;
 				pold->UpPoint = pnew;
-				
+
 				pold = pnew;
 				head->Foot++;
 				isFoot[y-1][x] =1;
