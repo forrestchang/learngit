@@ -70,8 +70,6 @@ int Hand;
 int Round = 1;
 int FoundFood = 0;
 struct Food food;
-int MainX;
-int MainY;
 int isFoot10[DY][DX] = {0};
 
 int main()
