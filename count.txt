@@ -1,0 +1,274 @@
+# include <stdio.h>
+# include<windows.h>
+# include<math.h>
+typedef struct 
+{
+	double a[100];
+	int top ; 
+}data;
+
+typedef struct 
+{
+	char a[100];
+	int top;
+}sign;
+
+void init_data(data *p)
+{
+	p->top = -1;
+}
+
+void init_sign(sign *p)
+{
+	p->top = -1;
+}
+
+void push_data(data *p,double x)
+{
+	p->top++;
+	p->a[p->top] = x;
+}
+
+void push_sign(sign *p,char x)
+{
+	p->top++;
+	p->a[p->top] = x;
+}
+
+double pop_data(data *p)
+{
+	double x;
+	x = p->a[p->top];
+	p->top--;
+	return x;
+}
+
+char pop_sign(sign *p)
+{
+	char x;
+	x = p->a[p->top];
+	p->top--;
+	return x;
+}
+
+int compareSign(char inside,char out)    //   +   #      #  (       *   #
+{
+	switch (out)
+	{
+	case '+':
+	case '-':
+		if (inside =='+' || inside == '-' ||inside == '*'||inside == '/')
+			return 1;     //  ????
+		else if (inside == '(' || inside == '|' || inside == '=')
+			return -1;   //  ?1??
+		else 
+			printf("error +  - \n");
+		break;
+	case '*':
+	case '/':
+		if (inside == '=' || inside == '(' || inside == '+' || inside == '-' || inside == '=' || inside == '|')
+			return -1;
+		else if (inside == '*' || inside == '/' )
+			return 1;
+		else 
+			printf("error  *  /\n");
+		break;
+		
+	case '|':
+	case '(':
+		return -1;
+		break;
+	case '#':
+	case ')':
+		if (inside == '+' || inside == '-' || inside == '*' || inside == '/')
+			return 1;
+		else if (inside == '(' || inside == '|')
+			return 2;    //3???????·?
+		else
+			printf("error  |2 .)");
+		break;
+		
+	case '=':
+		if (inside == '=')
+		{
+			return -1;
+		}
+		else if (inside == '+'|| inside == '-' || inside == '/' || inside == '*')
+			return 1;    //  ??DD
+		else 
+			printf("error   =====");
+		break;
+	default :
+		printf("error");
+		break;
+	}
+	return 0;
+}
+
+double operate(double inside , char s ,double now)
+{
+	double result;
+	switch(s)
+	{
+	case '+':
+		result = inside + now;
+		break;
+	case '-':
+		result = inside - now;
+		break;
+	case '*':
+		result = inside * now;
+		break;
+	case '/':
+		if (now == 0)
+		{
+			printf("error");
+			exit(0);
+		}
+		else 
+			result = inside/now;
+		break;
+	default :
+		printf("error");
+		exit(0);
+		break;
+	}
+	return result;
+}
+
+bool judge(char ch)
+{
+	if (ch == '+' || ch == '-' || ch == '*' || ch == '(' || ch == ')' || ch =='='|| ch == '|'||ch == '/'|| ch =='#')
+		return true;
+	return false;
+}
+
+char getTopSign(sign *p)
+{
+	return p->a[p->top]; 
+}
+
+double getTopData(data *p)
+{
+	return p->a[p->top];
+}
+
+bool searchAbsSign(sign *p)
+{
+	
+	int x =  p->top;
+	for ( ; x>=0; x--)
+	{
+		if (p->a[x] == '|')
+			return true;
+	}
+	return false;
+}
+
+void color()
+{
+	char a[20]="color 02";
+	for (int i=0;i<5;i++)
+	{	
+		a[6] = (char)(i+(int)'0');
+		a[7] = (char)(i+(int)'3');
+		Sleep(1000);
+
+		system(a);
+	}
+}
+
+int main()
+{
+	color();
+	data da;
+	sign si;
+	int op;
+	double i;
+	double a,b;
+	double result;
+	int countAbs=0;      
+	char ch;
+	double h;
+	init_data(&da);
+	init_sign(&si);
+	push_sign(&si,'=');
+	ch = getchar();
+	while (ch != '='|| getTopSign(&si) != '=')
+	{    
+		
+		if (!judge(ch))
+		{
+			i = atof(&ch);
+			ch = getchar();	
+			while (!judge(ch))
+			{
+				i = i*10+atoi(&ch);
+				ch = getchar();
+			}
+			if (ch == '.')
+			{
+				ch = '1';  
+				for (int j=1 ;ch>='0'&&ch<='9';j++)
+				{
+					int g = 0;
+					ch = getchar();
+					g = atoi(&ch);
+					i += g/pow(10,j);
+				}
+			}
+			push_data(&da,i);
+		}
+		else
+		{
+			if (searchAbsSign(&si) && ch == '|' && getTopSign(&si) != '|')
+				op = 1;
+			else if (getTopSign(&si) == '|' && ch == '|')
+			{
+				op = 2;
+				h = pop_data(&da);
+				h = fabs(h);
+				push_data(&da,h);
+			}
+			else
+				op = compareSign(getTopSign(&si),ch);
+			switch(op)
+			{
+			case 1:
+				a = pop_data(&da);
+				b = pop_data(&da);
+				result = operate(b,pop_sign(&si),a);
+				push_data(&da,result);
+				break;
+			case 2:
+				pop_sign(&si);
+				ch = getchar();
+				break;
+			case -1:
+				push_sign(&si,ch);
+				ch = getchar();
+				break;
+			case 3:
+				if (searchAbsSign(&si))
+				{
+					a = pop_data(&da);
+					b = pop_data(&da);
+					result = operate(b,pop_sign(&si),a);
+					push_data(&da,fabs(result));
+				}
+				else
+				{
+					push_sign(&si,ch);
+					ch = getchar();
+				}	
+				break;
+			default:
+				printf("error \n");
+				break;
+			}
+		}
+	}
+	printf("%lf\n",getTopData(&da));
+	return 0;
+}
+
