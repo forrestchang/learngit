@@ -1,0 +1,985 @@
+#include<stdio.h>
+#include<stdlib.h>
+#include<conio.h>
+#include<Windows.h>
+#include<time.h>
+#include<math.h>
+
+#define DX 6
+#define DY 6
+enum FACE {UP_ = 1,DOWN_= 2,LEFT_= 3,RIGHT_= 4};
+struct Snake
+{
+	int X;
+	int Y;
+	int LastX;
+	int LastY;
+	int Long;
+	int Life;
+	int Speed;
+	int Score;
+	int face;
+	int Foot;
+	int Foodx;
+	int Foody;
+};
+
+struct Food
+{
+	int Mode;
+	int X;
+	int Y;
+	int Value;
+};
+
+typedef struct SnakeHistory
+{
+	int x;
+	int y;
+	int Foot;
+	int GoodFace;
+	int isFinish;
+	struct SnakeHistory *LastPoint;
+	struct SnakeHistory *UpPoint;
+	struct SnakeHistory *DownPoint;
+	struct SnakeHistory *LeftPoint;
+	struct SnakeHistory *RightPoint;
+}history;
+
+int move(int Map[DY][DX],struct Snake &snake);
+void gotoxy(int x, int y);
+void PrintMap(int Map[DY][DX],struct Snake &snake);
+void Frist(int Map[DY][DX],struct Snake &snake);
+int Game();
+void EatFoot(int Map[DY][DX],struct Snake &snake);
+void Control(int Map[DY][DX],struct Snake &snake);
+void setFood(int Map[DY][DX],struct Snake &snake);
+void PrintText(struct Snake &snake);
+history* SnakeAI(int Map[DY][DX],struct Snake &snake);
+int Event(int Map[DY][DX],int n,struct Snake &snake);
+history* SnakeAITail(int Map[DY][DX],struct Snake &snake);
+int MoNiSnake(int Map1[DY][DX],struct Snake &snake1,history *head);
+void RandSnake(int Map[DY][DX],Snake &snake,int n);
+int SnakeAIMove(int Map[DY][DX],Snake &snake,int _x,int _y);
+void SnakeAIMove2(int Map[DY][DX],Snake &snake,int _x,int _y);
+int GetMoveFoot(int Map[DY][DX],int x1,int y1,int x2,int y2);
+history *GetMoveHistory(int Map[DY][DX],int x1,int y1,int x2,int y2);
+int GetMoveFoot2(int Map[DY][DX],int x1,int y1,int x2,int y2,int Foots,int Min);
+
+int Hand;
+int Round = 1;
+int FoundFood = 0;
+struct Food food;
+int isFoot10[DY][DX] = {0};
+
+int main()
+{
+	int n;
+	char a;
+	system("cls");
+	gotoxy(DX/2*2-4,DY/2-1);
+	printf("1.手动运行");
+	gotoxy(DX/2*2-4,DY/2);
+	printf("2.自动运行");
+	a = getch();
+	if(a == '1')
+		Hand = 1;
+	else 
+		Hand = 0;
+	n = Game();
+	while(1)
+	{
+		if(n == 1)
+		{
+			system("cls");
+			gotoxy(DX/2*2-4,DY/2-1);
+			printf("1.手动运行");
+			gotoxy(DX/2*2-4,DY/2);
+			printf("2.自动运行");
+			a = getch();
+			if(a == '1')
+				Hand = 1;
+			else 
+				Hand = 0;
+			Round = 1;
+			system("cls");
+			n = Game();
+		}
+		else if(n == 2)
+		{
+			Round++;
+			system("cls");
+			gotoxy(DX/2*2-4,DY/2-1);
+			printf("恭喜过关\n");
+			Sleep(500);
+			system("cls");
+			gotoxy(DX/2*2-4,DY/2-1);
+			printf("第%d关\n",Round);
+			Sleep(500);
+			system("cls");
+			n = Game();
+		}
+		else
+		{
+			system("cls");
+			gotoxy(35,12);
+			return 0;
+		}
+	}
+	return 0;
+}
+
+int Game()
+{	
+	struct Snake snake;
+	int Map[DY][DX];
+	int a,b;
+	int n = 0;
+	food.Mode = 1;
+	food.X = 0;
+	food.Y = 0;
+	food.Value = 1;
+	Frist(Map,snake);
+	if(Hand==1) {
+		system("cls");
+		PrintMap(Map,snake);
+		gotoxy(0,DY);
+		printf("任意键开始游戏");
+		getch();}
+	system("cls");
+	PrintMap(Map,snake);
+	setFood(Map,snake);
+	while(1)
+	{	
+		Sleep(10);
+		n++;
+		b = Event(Map,n,snake);
+		if(b==-1)
+		{
+			gotoxy(1,DY+3);
+			system("pause");
+			Sleep(500);
+			system("cls");
+			gotoxy(DX/2*2-4,DY/2-1);
+			printf("你死了");
+			gotoxy(DX/2*2-4,DY/2+4);
+			printf("1.重新开始");
+			gotoxy(DX/2*2-4,DY/2+5);
+			printf("2.退出游戏");
+			fflush(stdin);
+			a = getch();
+			if(a == '2')
+				return 0;
+			else
+				return 1;
+		}
+		if(b == 1)
+			return 2;
+	}
+	return 0;
+}
+
+void setFood(int Map[DY][DX],struct Snake &snake)
+{
+	static int n =1,m= 1;
+	do{
+		n++;
+		srand(time(0)%100000+n*4+m);
+		food.X = rand()%(DX-1)+1;
+		srand(time(0)%100000+n+m*3);
+		m+=2;
+		food.Y = rand()%(DY-1)+1;
+	}while(Map[food.Y][food.X] != 0);
+	food.Mode = 3;
+	food.Value = 1;
+	Map[food.Y][food.X] = food.Mode;
+	gotoxy(food.X*2,food.Y);
+	printf("☆");
+	return;
+}
+void Frist(int Map[DY][DX],struct Snake &snake)
+{
+	int i,j;
+	for(i=0;i<DY;i++)
+		for(j=0;j<DX;j++)
+			if(i==0||i==DY-1||j==0||j==DX -1)
+				Map[i][j] = 99;
+			else
+				Map[i][j] = 0;
+	snake.X = DX/2;
+	snake.Y = DY/2;
+	snake.LastX = DX/2;
+	snake.LastY = DY/2;
+	snake.Long = 1;
+	snake.Life = 2;
+	snake.Speed = 10*Round;
+	snake.Score = 0;
+	snake.face = UP_;
+	snake.Foot = 100;
+	Map[snake.Y][snake.X] = 2;
+}
+void setSnake(int _x,int _y,struct Snake &snake)
+{
+	snake.X = _x;
+	snake.Y = _y;
+}
+
+void PrintMap(int Map[DY][DX],struct Snake &snake)
+{
+	int i,j;
+	for(i=0;i<DY ;i++)
+	{
+		for(j=0;j<DX ;j++)
+			switch(Map[i][j])
+		{
+			case 99:printf("█");break;
+			case 2:printf("●");break;
+			case 3:printf("☆");break;
+			case 0:printf("  ");break;
+			case 4:printf("╳");break;
+			default:printf("╳");break;
+		}
+		printf("\n");
+	}
+}
+
+void gotoxy(int x, int y)
+{
+	COORD c;
+	c.X = x; c.Y = y;
+	SetConsoleCursorPosition(GetStdHandle(STD_OUTPUT_HANDLE), c);
+}
+
+int move(int Map[DY][DX],struct Snake &snake)
+{
+	int foot;
+	static int Foots = 1;
+	int x = snake.X;
+	int y = snake.Y;
+	static history *p = NULL,*q = NULL;
+	history *TempHead = NULL;
+	foot = Map[snake.LastY][snake.LastX] +1;
+
+	if(Hand==0)
+	{
+		if(SnakeAI(Map,snake)!=NULL)
+		{
+			TempHead = GetMoveHistory(Map,snake.Foodx,snake.Foody,snake.X,snake.Y);
+			if(MoNiSnake(Map,snake,TempHead)==1)
+			{
+				if(SnakeAIMove(Map,snake,snake.Foodx,snake.Foody)==0)
+				{
+					SnakeAIMove2(Map,snake,snake.Foodx,snake.Foody);	
+				}
+			}
+			else
+			{
+				if(SnakeAITail(Map,snake)!=NULL)
+				{
+					if(SnakeAITail(Map,snake)!=NULL)
+					{
+						TempHead = GetMoveHistory(Map,snake.LastX,snake.LastY,snake.X,snake.Y);
+						if(MoNiSnake(Map,snake,TempHead)==1)
+						{
+							if(SnakeAIMove(Map,snake,snake.LastX,snake.LastY)==0)
+							{
+								SnakeAIMove(Map,snake,snake.Foodx,snake.Foody);
+							}
+						}
+						else
+						{
+							SnakeAIMove(Map,snake,snake.Foodx,snake.Foody);
+						}
+					}
+					else
+					{
+						SnakeAIMove2(Map,snake,snake.LastX,snake.LastY);
+					}
+				}
+				else
+				{
+					SnakeAIMove(Map,snake,snake.Foodx,snake.Foody);
+				}
+			}
+		}
+		else
+		{
+			if(SnakeAITail(Map,snake)!=NULL)
+			{
+				SnakeAIMove(Map,snake,snake.LastX,snake.LastY);
+			}
+			else
+			{
+				SnakeAIMove2(Map,snake,snake.LastX,snake.LastY);
+			}
+		}
+	}
+	gotoxy(1,DY+1);
+	printf("方向:%s",snake.face ==UP_?"上":snake.face ==DOWN_?"下":snake.face ==LEFT_?"左":snake.face ==RIGHT_?"右":"空");
+	Map[snake.Y][snake.X] = snake.Foot;
+	snake.Foot++;
+	if(snake.Life <= snake.Long)
+	{
+		Map[snake.LastY][snake.LastX] = 0;
+		gotoxy(snake.LastX*2,snake.LastY);
+		printf("  ");
+		if(Map[snake.LastY-1][snake.LastX]==foot )
+			snake.LastY --;
+		else if(Map[snake.LastY+1][snake.LastX]==foot )
+			snake.LastY ++;
+		else if(Map[snake.LastY][snake.LastX-1]==foot )
+			snake.LastX --;
+		else if(Map[snake.LastY][snake.LastX+1]==foot )
+			snake.LastX ++;
+		gotoxy(snake.LastX*2,snake.LastY);
+		printf("**");
+	}
+	else
+		snake.Long++;
+	switch(snake.face)
+	{
+	case UP_:y--;break;
+	case DOWN_:y++;break;
+	case LEFT_:x--;break;
+	case RIGHT_:x++;break;
+	}
+	switch(Map[y][x])
+	{
+	case 99:
+	case 1:
+	case 2:return -1;break;
+	case 3:EatFoot(Map,snake);break;
+	case 0:break;
+	default: return -1;break;
+	}
+	gotoxy(snake.X*2,snake.Y);
+	printf("╳");
+	snake.Y = y;
+	snake.X = x;
+	Map[y][x] = 2;
+	gotoxy(x*2,y);
+	printf("●");
+	return 1;
+}
+void EatFoot(int Map[DY][DX],struct Snake &snake)
+{
+	snake.Life +=food.Value;
+	snake.Score += food.Value*(snake.Speed/10+1);
+	snake.Speed+=5;
+	FoundFood = 0;
+	setFood(Map,snake);
+}
+
+void Control(int Map[DY][DX],struct Snake &snake)
+{
+	char a;
+	if(kbhit())
+	{	
+		a = getch();
+		if(a<0)
+		{
+			a = getch();
+			switch(a)
+			{
+			case 72:if(Map[snake.Y-1][snake.X]<100) snake.face = UP_;break;
+			case 80:if(Map[snake.Y+1][snake.X]<100) snake.face = DOWN_;break;
+			case 75:if(Map[snake.Y][snake.X-1]<100) snake.face = LEFT_;break;
+			case 77:if(Map[snake.Y][snake.X+1]<100) snake.face = RIGHT_;break;
+			}
+		}
+		else
+			switch(a)
+		{
+			case 'w':if(Map[snake.Y-1][snake.X]<100) snake.face = UP_;break;
+			case 's':if(Map[snake.Y+1][snake.X]<100) snake.face = DOWN_;break;
+			case 'a':if(Map[snake.Y][snake.X-1]<100) snake.face = LEFT_;break;
+			case 'd':if(Map[snake.Y][snake.X+1]<100) snake.face = RIGHT_;break;
+		}
+	}
+}
+
+void PrintText(struct Snake &snake)
+{
+	//gotoxy(30,20);
+	//printf("长度:%d,积分:%d/%d",snake.Long,snake.Score,Round*Round*10);
+}
+
+int Event(int Map[DY][DX],int n,struct Snake &snake)
+{
+	int i,j;
+	int win = 0;
+	int speed;
+	for(i=0;i<DY;i++)
+		for(j=0;j<DX;j++)
+			if(Map[i][j] == 0)
+				win =1;
+	if(win ==0)
+		return 1;
+	PrintText(snake);
+	if(Hand==1)
+	{
+		Control(Map,snake);
+	}
+	speed = 100-snake.Speed>=1?(100-snake.Speed)/10+1:1;
+	if(1)
+	{
+		if(move(Map,snake)==-1)
+			return -1;
+	}
+	return 0;
+}
+
+history* SnakeAI(int Map[DY][DX],struct Snake &snake)
+{
+	int Found = 0;
+	int isfoot[DY][DX] ={0};
+	history *head;
+	history *pold,*pnew;
+	int n =0;
+	pold =pnew=head = (history*)malloc(sizeof(history));
+	head->Foot = 0;
+	head->isFinish = 0;
+	head->DownPoint = NULL;
+	head->RightPoint =NULL;
+	head->LeftPoint = NULL;
+	head->UpPoint = NULL;
+	head->LastPoint = NULL;
+	head->x = snake.X;
+	head->y = snake.Y;
+	head->GoodFace = DOWN_;
+	MainX = snake.X;
+	MainY = snake.Y;
+
+	while(1)
+	{
+		if(Found ==1)//是否找到苹果
+		{
+			return head;
+		}
+		if(head->isFinish ==4&&pold ==head)//是否遍历完
+		{
+			return NULL;
+		}
+		if(pold->isFinish>=4)//是否遍历完
+		{
+			pold=pold->LastPoint;
+			switch(pold->isFinish)
+			{
+			case 1:pold->UpPoint =NULL;break;
+			case 2:pold->DownPoint =NULL;break;
+			case 3:pold->LeftPoint =NULL;break;
+			case 4:pold->RightPoint =NULL;break;
+			}
+			continue;
+		}
+		switch(pold->isFinish)
+		{
+		case 0:if(isfoot[pold->y-1][pold->x]==1) {pold->isFinish++;continue;}break;
+		case 1:if(isfoot[pold->y][pold->x+1]==1) {pold->isFinish++;continue;}break;
+		case 2:if(isfoot[pold->y][pold->x-1]==1) {pold->isFinish++;continue;}break;
+		case 3:if(isfoot[pold->y+1][pold->x]==1) {pold->isFinish++;continue;}break;
+		}
+		n++;
+		pnew= (history*)malloc(sizeof(history));//初始化
+		pnew->Foot = 0;
+		pnew->isFinish = 0;
+		pnew->DownPoint = NULL;
+		pnew->RightPoint =NULL;
+		pnew->LeftPoint = NULL;
+		pnew->UpPoint = NULL;
+		pnew->LastPoint = pold;
+		pnew->GoodFace =UP_;
+		pnew->x = pold->x;
+		pnew->y = pold->y;
+		switch(pold->isFinish)//走方向
+		{
+		case 0:pnew->y--;pold->GoodFace =UP_;break;
+		case 1:pnew->x++;pold->GoodFace =RIGHT_;break;
+		case 2:pnew->x--;pold->GoodFace =LEFT_;break;
+		case 3:pnew->y++;pold->GoodFace =DOWN_;break;
+		}
+		switch(pold->isFinish)//定义上一个点与新的连接
+		{
+		case 0:pold->UpPoint = pnew;break;
+		case 1: pold->RightPoint = pnew;break;
+		case 2: pold->LeftPoint = pnew;break;
+		case 3: pold->DownPoint = pnew;break;
+		}
+		pold->isFinish++;
+		pold = pnew;
+		if(Map[pnew->y][pnew->x]==3)
+		{
+			snake.Foodx = pnew->x;
+			snake.Foody = pnew->y;
+			Found =1;
+			return head;
+		}
+		if(Map[pnew->y][pnew->x]>=99||isfoot[pnew->y][pnew->x] == 1||Map[pnew->y][pnew->x]==2)
+		{
+			pold=pold->LastPoint;
+		}
+		isfoot[pnew->y][pnew->x] = 1;
+	}
+	return head;
+}
+
+history* SnakeAITail(int Map[DY][DX],struct Snake &snake)
+{
+	int Found = 0;
+	int isfoot[DY][DX] ={0};
+	history *head;
+	history *pold,*pnew;
+	int n =0;
+	pold =pnew=head = (history*)malloc(sizeof(history));
+	head->Foot = 0;
+	head->isFinish = 0;
+	head->DownPoint = NULL;
+	head->RightPoint =NULL;
+	head->LeftPoint = NULL;
+	head->UpPoint = NULL;
+	head->LastPoint = NULL;
+	head->x = snake.X;
+	head->y = snake.Y;
+	head->GoodFace = DOWN_;
+
+	while(1)
+	{
+		if(Found ==1)//是否找到苹果
+		{
+			return head;
+		}
+		if(head->isFinish ==4&&pold ==head)//是否遍历完
+		{
+			return NULL;
+		}
+		if(pold->isFinish>=4)//是否遍历完
+		{
+			pold=pold->LastPoint;
+			switch(pold->isFinish)
+			{
+			case 1:pold->UpPoint =NULL;break;
+			case 2:pold->DownPoint =NULL;break;
+			case 3:pold->LeftPoint =NULL;break;
+			case 4:pold->RightPoint =NULL;break;
+			}
+			continue;
+		}
+		switch(pold->isFinish)
+		{
+		case 0:if(isfoot[pold->y-1][pold->x]==1) {pold->isFinish++;continue;}break;
+		case 1:if(isfoot[pold->y+1][pold->x]==1) {pold->isFinish++;continue;}break;
+		case 2:if(isfoot[pold->y][pold->x-1]==1) {pold->isFinish++;continue;}break;
+		case 3:if(isfoot[pold->y][pold->x+1]==1) {pold->isFinish++;continue;}break;
+		}
+		n++;
+		pnew= (history*)malloc(sizeof(history));//初始化
+		pnew->Foot = 0;
+		pnew->isFinish = 0;
+		pnew->DownPoint = NULL;
+		pnew->RightPoint =NULL;
+		pnew->LeftPoint = NULL;
+		pnew->UpPoint = NULL;
+		pnew->LastPoint = pold;
+		pnew->GoodFace =UP_;
+		pnew->x = pold->x;
+		pnew->y = pold->y;
+		switch(pold->isFinish)//走方向
+		{
+		case 0:pnew->y--;pold->GoodFace =UP_;break;
+		case 1:pnew->y++;pold->GoodFace =DOWN_;break;
+		case 2:pnew->x--;pold->GoodFace =LEFT_;break;
+		case 3:pnew->x++;pold->GoodFace =RIGHT_;break;
+		}
+		switch(pold->isFinish)//定义上一个点与新的连接
+		{
+		case 0:pold->UpPoint = pnew;break;
+		case 1: pold->DownPoint = pnew;break;
+		case 2: pold->LeftPoint = pnew;break;
+		case 3: pold->RightPoint = pnew;break;
+		}
+		pold->isFinish++;
+		pold = pnew;
+		if(pnew->x==snake.LastX&&pnew->y==snake.LastY)
+		{
+			while(pnew!=NULL)
+			{
+				pnew = pnew->LastPoint;
+				head->Foot++;
+			}
+			Found =1;
+			return head;
+		}
+		if(Map[pnew->y][pnew->x]>=99||isfoot[pnew->y][pnew->x] == 1||Map[pnew->y][pnew->x]==2)
+		{
+			pold=pold->LastPoint;
+		}
+		isfoot[pnew->y][pnew->x] = 1;
+	}
+	return head;
+}
+
+int MoNiSnake(int Map1[DY][DX],struct Snake &snake1,history *head)
+{
+	struct Snake TempSnake;
+	int TempMap[DY][DX];
+	static history *q = NULL,*head1=NULL;
+	int x;
+	int y;
+	int foot;
+	int i,j;
+	int Foots;
+	for(i=0;i<DY;i++)
+		for(j=0;j<DX;j++)
+			TempMap[i][j] = Map1[i][j];
+	TempSnake = snake1;
+	Foots = head->Foot;
+	q  = head;
+	while(Foots>0)
+	{
+		y = TempSnake.Y;
+		x = TempSnake.X;
+		foot = TempMap[TempSnake.LastY][TempSnake.LastX] +1;
+		TempSnake.face = q->GoodFace;
+		switch(q->GoodFace)
+		{
+		case UP_:q=q->UpPoint;break;
+		case DOWN_:q=q->DownPoint;break;
+		case LEFT_:q=q->LeftPoint;break;
+		case RIGHT_:q=q->RightPoint;break;
+		}
+		TempMap[TempSnake.Y][TempSnake.X] = TempSnake.Foot;
+		TempSnake.Foot++;
+		if(TempSnake.Life <= TempSnake.Long)
+		{
+			TempMap[TempSnake.LastY][TempSnake.LastX] = 0;
+			if(TempMap[TempSnake.LastY-1][TempSnake.LastX]==foot )
+				TempSnake.LastY --;
+			else if(TempMap[TempSnake.LastY+1][TempSnake.LastX]==foot )
+				TempSnake.LastY ++;
+			else if(TempMap[TempSnake.LastY][TempSnake.LastX-1]==foot )
+				TempSnake.LastX --;
+			else if(TempMap[TempSnake.LastY][TempSnake.LastX+1]==foot )
+				TempSnake.LastX ++;
+		}
+		else
+			TempSnake.Long++;
+		switch(TempSnake.face)
+		{
+		case UP_:y--;break;
+		case DOWN_:y++;break;
+		case LEFT_:x--;break;
+		case RIGHT_:x++;break;
+		}
+		TempSnake.Y = y;
+		TempSnake.X = x;
+		TempMap[y][x] = 2;
+		Foots--;
+	}
+	head1 = SnakeAITail(TempMap,TempSnake);
+	if(head1!=NULL)
+		return 1;
+	else
+		return 0;
+	return 0;
+}
+
+void RandSnake(int Map[DY][DX],Snake &snake,int n)
+{
+	if(Map[snake.Y-1][snake.X]<99)
+		snake.face = UP_;
+	else if(Map[snake.Y][snake.X+1]<99)
+		snake.face = RIGHT_;
+	else if(Map[snake.Y+1][snake.X]<99)
+		snake.face = DOWN_;
+	else 
+		snake.face = LEFT_;
+
+
+	if(Map[snake.Y-1][snake.X]==3)
+		snake.face = UP_;
+	if(Map[snake.Y+1][snake.X]==3)
+		snake.face = DOWN_;
+	if(Map[snake.Y][snake.X-1]==3)
+		snake.face = LEFT_;
+	if(Map[snake.Y][snake.X+1]==3)
+		snake.face = RIGHT_;
+
+}
+
+void SnakeAIMove2(int Map[DY][DX],Snake &snake,int _x,int _y)
+{
+	int Fx = _x;
+	int Fy = _y;
+	int x = snake.X;
+	int y = snake.Y;
+	int Foot[DY][DX] = {0};
+	int i,j;
+	int Value;
+	for(i=0;i<DY;i++)
+	{
+		for(j=0;j<DX;j++)
+		{
+			Foot[i][j] = abs(j-Fx)+abs(i-Fy);
+		}
+	}
+	Value = Foot[y][x];
+	while(1)
+	{
+		if(Value>=Foot[y-1][x]&&Map[y-1][x]<99)
+		{
+			snake.face = UP_;
+			return;
+		}
+		if(Value>=Foot[y+1][x]&&Map[y+1][x]<99)
+		{
+			snake.face =DOWN_;
+			return;
+		}
+		if(Value>=Foot[y][x-1]&&Map[y][x-1]<99)
+		{
+			snake.face = LEFT_;
+			return;
+		}
+		if(Value>=Foot[y-1][x+1]&&Map[y][x+1]<99)
+		{
+			snake.face = RIGHT_;
+			return;
+		}
+		Value++;
+		if(Value>DY*DX)
+		{
+			snake.face = RIGHT_;
+			return;
+		}
+	}
+}
+
+int SnakeAIMove(int Map[DY][DX],Snake &snake,int _x,int _y)
+{
+	int Fx = _x;
+	int Fy = _y;
+	int x = snake.X;
+	int y = snake.Y;
+	int Foot[DY][DX] = {0};
+	int i,j;
+	int Value;
+	for(i=0;i<DY;i++)
+	{
+		for(j=0;j<DX;j++)
+		{
+			if(i==0||i==DY-1||j==0||j==DX-1)
+				Foot[i][j] = DX*DY*2;
+			else if(Map[i][j]>=99&&!(i==Fy&&j==Fx))
+				Foot[i][j] = DX*DY*2;
+			else 
+				Foot[i][j] = GetMoveFoot(Map,j,i,Fx,Fy);		
+		}
+	}
+	system("cls");
+	for(i=0;i<DY;i++)
+	{
+	for(j=0;j<DX;j++)
+	{
+	printf("%-4d ",Foot[i][j]);
+	}
+	printf("\n");
+	}
+	PrintMap(Map,snake);
+	getch();
+	system("cls");
+	PrintMap(Map,snake);
+	Value = Foot[y][x];
+	while(1)
+	{
+		if((Value==Foot[y-1][x]+1&&Map[y-1][x]<99&&Map[y-1][x]!=2)||(Fx == x&&Fy == y-1))
+		{
+			snake.face = UP_;
+			return 1;
+		}
+		if((Value==Foot[y+1][x]+1&&Map[y+1][x]<99&&Map[y+1][x]!=2)||(Fx == x&&Fy == y+1))
+		{
+			snake.face =DOWN_;
+			return 1;
+		}
+		if((Value==Foot[y][x-1]+1&&Map[y][x-1]<99&&Map[y][x-1]!=2)||(Fx == x-1&&Fy == y))
+		{
+			snake.face = LEFT_;
+			return 1;
+		}
+		if((Value==Foot[y][x+1]+1&&Map[y][x+1]<99&&Map[y][x+1]!=2)||(Fx == x+1&&Fy == y))
+		{
+			snake.face = RIGHT_;
+			return 1;
+		}
+		Value++;
+		if(Value>DY*DX)
+		{
+			return 0;
+		}
+	}
+	return 0;
+}
+
+int GetMoveFoot(int Map[DY][DX],int x1,int y1,int x2,int y2)
+{
+	int foots = 0;
+	int Fx = x1;
+	int Fy = y1;
+	int x = x2;
+	int y = y2;
+	int i,j;
+	int Min =99999;
+	for(i=0;i<DY;i++)
+		for(j=0;j<DX;j++)
+			isFoot10[i][j] = 0;
+	isFoot10[y1][x1] = 1;
+	foots = GetMoveFoot2(Map,x1,y1,x2,y2,0,Min);
+	return foots;
+}
+int GetMoveFoot2(int Map[DY][DX],int x1,int y1,int x2,int y2,int Foots,int Min)
+{
+	int tx,ty;
+	int i,j;
+	int next[4][2] = {
+		{-1,0},//上
+		{0,1},//右
+		{1,0},//下
+		{0,-1}//左
+	};
+	if(x1 == x2&&y1 == y2)
+	{
+		if(Foots<Min)
+			Min = Foots;
+		return Min;
+	}
+	for(i=0;i<4;i++)
+	{
+		tx = x1+ next[i][0];
+		ty = y1 +next[i][1];
+		if(ty<1||tx<1||ty>DY-1||tx>DX-1)
+			continue;
+		if(Map[ty][tx]<99&&isFoot10[ty][tx]==0)
+		{
+			isFoot10[ty][tx] = 1;
+			Min = GetMoveFoot2(Map,tx,ty,x2,y2,Foots+1,Min);
+			isFoot10[ty][tx] = 0;
+		}
+	}
+	return Min;
+}
+
+history *GetMoveHistory(int Map[DY][DX],int x1,int y1,int x2,int y2)
+{
+	history *head,*pold,*pnew;
+	int Fx = x1;
+	int Fy = y1;
+	int x = x2;
+	int y = y2;
+	int Foot[DY][DX] = {0};
+	int isFoot[DY][DX] = {0};
+	int i,j;
+	int Value;
+	isFoot[y][x] =1;
+	pold = pnew = head = (history*)malloc(sizeof(history));
+	head->Foot = 0;
+	head->DownPoint = NULL;
+	head->RightPoint =NULL;
+	head->LeftPoint = NULL;
+	head->UpPoint = NULL;
+	head->LastPoint = NULL;
+	for(i=0;i<DY;i++)
+	{
+		for(j=0;j<DX;j++)
+		{
+			if(i==0||i==DY-1||j==0||j==DX-1)
+				Foot[i][j] = DX*DY*2;
+			else if(Map[i][j]>=99&&!(i==Fy&&j==Fx))
+				Foot[i][j] = DX*DY*2;
+			else 
+				Foot[i][j] = GetMoveFoot(Map,j,i,Fx,Fy);		
+		}
+	}
+	while(1)
+	{
+		if(Fx == x&&Fy == y)
+			break;
+		Value = Foot[y][x];
+		while(1)
+		{
+			if((Value==Foot[y-1][x]+1&&Map[y-1][x]<99&&isFoot[y-1][x] ==0)||(Fx == x&&Fy == y-1))
+			{
+				pnew = (history*)malloc(sizeof(history));
+				pnew->DownPoint = NULL;
+				pnew->RightPoint =NULL;
+				pnew->LeftPoint = NULL;
+				pnew->UpPoint = NULL;
+				pnew->LastPoint = pold;
+				pold->GoodFace = UP_;
+				pold->UpPoint = pnew;
+
+				pold = pnew;
+				head->Foot++;
+				isFoot[y-1][x] =1;
+				y--;
+				break;
+			}
+			if((Value==Foot[y][x-1]+1&&Map[y][x-1]<99&&isFoot[y][x-1] ==0)||(Fx == x-1&&Fy == y))
+			{
+				pnew = (history*)malloc(sizeof(history));
+				pnew->DownPoint = NULL;
+				pnew->RightPoint =NULL;
+				pnew->LeftPoint = NULL;
+				pnew->UpPoint = NULL;
+				pnew->LastPoint = pold;
+				pold->GoodFace = LEFT_;
+				pold->LeftPoint = pnew;
+				pold = pnew;
+				head->Foot++;
+				isFoot[y][x-1] =1;
+				x--;
+				break;
+			}
+			if((Value==Foot[y+1][x]+1&&Map[y+1][x]<99&&isFoot[y+1][x] ==0)||(Fx == x&&Fy == y+1))
+			{
+				pnew = (history*)malloc(sizeof(history));
+				pnew->DownPoint = NULL;
+				pnew->RightPoint =NULL;
+				pnew->LeftPoint = NULL;
+				pnew->UpPoint = NULL;
+				pnew->LastPoint = pold;
+				pold->GoodFace = DOWN_;
+				pold->DownPoint = pnew;
+				pold = pnew;
+				head->Foot++;
+				isFoot[y+1][x] =1;
+				y++;
+				break;
+			}
+			if((Value==Foot[y][x+1]+1&&Map[y][x+1]<99&&isFoot[y][x+1] ==0)||(Fx == x+1&&Fy == y))
+			{
+				pnew = (history*)malloc(sizeof(history));
+				pnew->DownPoint = NULL;
+				pnew->RightPoint =NULL;
+				pnew->LeftPoint = NULL;
+				pnew->UpPoint = NULL;
+				pnew->LastPoint = pold;
+				pold->GoodFace = RIGHT_;
+				pold->RightPoint = pnew;
+				pold = pnew;
+				head->Foot++;
+				isFoot[y][x+1] =1;
+				x++;
+				break;
+			}
+			Value++;
+			if(Value>DY*DX)
+			{
+				head->Foot =1;
+				return head;
+				break;
+			}
+		}
+	}
+	//getch();
+	return head;
+}
